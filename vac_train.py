@@ -76,16 +76,19 @@ model.add(Activation('softmax'))
 rmsplop = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
 model.compile(loss='categorical_crossentropy', optimizer=rmsplop, metrics=['accuracy'])
 
+date_str = datetime.datetime.now().strftime('%Y%m%d%H')
+callback_save_epoch_end = keras.callbacks.LambdaCallback(on_epoch_end=model.save('kml_' + date_str + '.model'))
+
 # training
 hist = model.fit(x_train, y_train,
                  batch_size=BATCH_SIZE,
                  verbose=1,
                  nb_epoch=EPOCH,
-                 validation_data=(x_test, y_test))
+                 validation_data=(x_test, y_test),
+                 callbacks=[callback_save_epoch_end])
 
-# save model
-date_str = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-model.save('vac_' + date_str + '.model')
+save model
+model.save('kml_' + date_str + '.model')
 
 # plot loss
 print(hist)

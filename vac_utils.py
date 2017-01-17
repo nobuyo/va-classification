@@ -20,9 +20,11 @@ def create_list(data_dir, list_dir, slash):
     classes = os.listdir(os.path.join('.', data_dir))
     data_list = []
     for i, cls in enumerate(classes):
-        files = os.listdir(os.path.join('.', data_dir, cls))
-        for f in files:
-            data_list.append(os.path.join('.', data_dir, cls, f))
+        dir_name = os.path.join('.', data_dir, cls)
+        if os.path.isdir(dir_name):
+            files = os.listdir(dir_name)
+            for f in files:
+                data_list.append(os.path.join('.', data_dir, cls, f))
 
     split_index = int(len(data_list) * slash)
     random.shuffle(data_list)
@@ -63,11 +65,12 @@ def load_images(classes, data_list):
     num_classes = len(classes)
     for data in data_list:
         img = cv2.imread(data)
-        img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
-        img = img/255.0
-        images.append(img)
-        lbl = np.zeros(num_classes)
-        lbl[classes.index(os.path.basename(os.path.dirname(data)))] = 1
-        labels.append(lbl)
+        if not img is None:
+            img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+            img = img/255.0
+            images.append(img)
+            lbl = np.zeros(num_classes)
+            lbl[classes.index(os.path.basename(os.path.dirname(data)))] = 1
+            labels.append(lbl)
     return images, labels
 
