@@ -14,9 +14,9 @@ def array_divide(arr, n):
 
 # checking existence of the class, train and test lists
 def exist_list(list_dir):
-    exists = os.path.exists(os.path.join('.', list_dir, 'class*.lst')) \
-             and os.path.exists(os.path.join('.', list_dir, 'train*.lst')) \
-             and os.path.exists(os.path.join('.', list_dir, 'test*.lst'))
+    exists = os.path.exists(os.path.join('.', list_dir, 'class.lst')) \
+             and os.path.exists(os.path.join('.', list_dir, 'train0.lst')) \
+             and os.path.exists(os.path.join('.', list_dir, 'test0.lst'))
     return exists
 
 # create and return the class, train and test lists

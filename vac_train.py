@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument('--data', dest='data_dir', default='data')
     parser.add_argument('--list', dest='list_dir', default='list')
     parser.add_argument('--model', dest='my_model', default=None)
-    parser.add_argument('--division', dest='divnum', default=None)
+    parser.add_argument('--division', dest='divnum', default=0)
     args = parser.parse_args()
     return args
 
@@ -51,9 +51,8 @@ BATCH_SIZE = 32
 EPOCH = 100
 
 # building the model
-print('building the model ...')
-
 if args.my_model is None:
+    print('building the model ...')
     model = Sequential()
 
     model.add(Convolution2D(32, 3, 3, border_mode='valid',
@@ -82,10 +81,11 @@ if args.my_model is None:
     rmsplop = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
     model.compile(loss='categorical_crossentropy', optimizer=rmsplop, metrics=['accuracy'])
 else:
+    print('rebuilding the model ...')
     model = load_model(args.my_model)
 
 date_str = datetime.datetime.now().strftime('%Y%m%d%H%M')
-# callback_early_stop     = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
+# callback_early_stop     = EarlyStopping(monitor='val_acc', patience=15, verbose=0, mode='auto')
 callback_save_epoch_end = LambdaCallback(on_epoch_end=model.save('epc_' + date_str + '.model'))
 
 # training
@@ -94,13 +94,11 @@ hist = model.fit(x_train, y_train,
                  verbose=1,
                  nb_epoch=EPOCH,
                  validation_data=(x_test, y_test),
+                 # callbacks=[callback_save_epoch_end, callback_early_stop])
                  callbacks=[callback_save_epoch_end])
 
 # save model
-if args.divnum is None:
-    model.save('vac.model')
-else:
-    model.save('vac' + divnum + '.model')
+model.save('vac' + str(args.divnum) + '.model')
 
 # plot loss
 print(hist)

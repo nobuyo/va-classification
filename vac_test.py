@@ -13,13 +13,14 @@ def parse_args():
     parser.add_argument('--data', dest='data_dir', default='data')
     parser.add_argument('--list', dest='list_dir', default='list')
     parser.add_argument('--model', dest='model_name', required=True)
+    parser.add_argument('--division', dest='div_num', default=0)
     args = parser.parse_args()
     return args
     
 args = parse_args()
 if kml_utils.exist_list(args.list_dir):
     print('Lists exist in ./{0}. Use the test list.'.format(args.list_dir))
-    classes, _, test_list = kml_utils.load_lists(args.list_dir)
+    classes, _, test_list = kml_utils.load_lists_with_division(args.list_dir,args.div_num)
 else:
     print('Lists do not exist.')
     exit(0)
