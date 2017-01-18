@@ -2,6 +2,8 @@
 from __future__ import print_function
 
 from keras.models import Sequential
+from keras.models import load_model
+from keras.callbacks import LambdaCallback, EarlyStopping
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import RMSprop
@@ -18,16 +20,19 @@ def parse_args():
     parser = argparse.ArgumentParser(description='image classifier')
     parser.add_argument('--data', dest='data_dir', default='data')
     parser.add_argument('--list', dest='list_dir', default='list')
+    parser.add_argument('--model', dest='my_model', default=None)
+    parser.add_argument('--division', dest='divnum', default=None)
     args = parser.parse_args()
     return args
 
 args = parse_args()
+
 if kml_utils.exist_list(args.list_dir):
     print('Lists already exist in ./{0}. Use these lists.'.format(args.list_dir))
-    classes, train_list, test_list = kml_utils.load_lists(args.list_dir)
+    classes, train_list, test_list = kml_utils.load_lists_with_division(args.list_dir, args.divnum)
 else:
     print('Lists do not exist. Create list from ./{0}.'.format(args.data_dir))
-    classes, train_list, test_list = kml_utils.create_list(args.data_dir, args.list_dir, SLASH)
+    classes, train_list, test_list = kml_utils.create_list_with_division(args.data_dir, args.list_dir, SLASH)
 
 train_image, train_label = kml_utils.load_images(classes, train_list)
 test_image, test_label = kml_utils.load_images(classes, test_list)
@@ -48,36 +53,40 @@ EPOCH = 100
 # building the model
 print('building the model ...')
 
-model = Sequential()
+if args.my_model is None:
+    model = Sequential()
 
-model.add(Convolution2D(32, 3, 3, border_mode='valid',
-                        input_shape=x_train.shape[1:]))
-model.add(Activation('relu'))
-model.add(Convolution2D(32, 3, 3))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+    model.add(Convolution2D(32, 3, 3, border_mode='valid',
+                            input_shape=x_train.shape[1:]))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(32, 3, 3))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
 
-model.add(Convolution2D(64, 3, 3, border_mode='valid'))
-model.add(Activation('relu'))
-model.add(Convolution2D(64, 3, 3))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+    model.add(Convolution2D(64, 3, 3, border_mode='valid'))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(64, 3, 3))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
 
-model.add(Flatten())
-model.add(Dense(128))
-# model.add(Dense(256))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))
-model.add(Dense(NUM_CLASSES))
-model.add(Activation('softmax'))
+    model.add(Flatten())
+    # model.add(Dense(128))
+    model.add(Dense(256))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(NUM_CLASSES))
+    model.add(Activation('softmax'))
 
-rmsplop = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
-model.compile(loss='categorical_crossentropy', optimizer=rmsplop, metrics=['accuracy'])
+    rmsplop = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
+    model.compile(loss='categorical_crossentropy', optimizer=rmsplop, metrics=['accuracy'])
+else:
+    model = load_model(args.my_model)
 
-date_str = datetime.datetime.now().strftime('%Y%m%d%H')
-callback_save_epoch_end = keras.callbacks.LambdaCallback(on_epoch_end=model.save('kml_' + date_str + '.model'))
+date_str = datetime.datetime.now().strftime('%Y%m%d%H%M')
+# callback_early_stop     = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
+callback_save_epoch_end = LambdaCallback(on_epoch_end=model.save('epc_' + date_str + '.model'))
 
 # training
 hist = model.fit(x_train, y_train,
@@ -87,8 +96,11 @@ hist = model.fit(x_train, y_train,
                  validation_data=(x_test, y_test),
                  callbacks=[callback_save_epoch_end])
 
-save model
-model.save('kml_' + date_str + '.model')
+# save model
+if args.divnum is None:
+    model.save('vac.model')
+else:
+    model.save('vac' + divnum + '.model')
 
 # plot loss
 print(hist)
@@ -111,4 +123,4 @@ leg.get_frame().set_alpha(0.5)
 plt.grid()
 plt.xlabel('epoch')
 plt.savefig('graph_' + date_str + '.png')
-plt.show()
+# plt.show()
