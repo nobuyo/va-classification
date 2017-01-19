@@ -11,7 +11,7 @@ import argparse
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-import kml_utils
+import vac_utils
 
 SLASH = 0.2 # percentage of test(validation) data
 
@@ -27,15 +27,15 @@ def parse_args():
 
 args = parse_args()
 
-if kml_utils.exist_list(args.list_dir):
+if vac_utils.exist_list(args.list_dir):
     print('Lists already exist in ./{0}. Use these lists.'.format(args.list_dir))
-    classes, train_list, test_list = kml_utils.load_lists_with_division(args.list_dir, args.divnum)
+    classes, train_list, test_list = vac_utils.load_lists_with_division(args.list_dir, args.divnum)
 else:
     print('Lists do not exist. Create list from ./{0}.'.format(args.data_dir))
-    classes, train_list, test_list = kml_utils.create_list_with_division(args.data_dir, args.list_dir, SLASH)
+    classes, train_list, test_list = vac_utils.create_list_with_division(args.data_dir, args.list_dir, SLASH)
 
-train_image, train_label = kml_utils.load_images(classes, train_list)
-test_image, test_label = kml_utils.load_images(classes, test_list)
+train_image, train_label = vac_utils.load_images(classes, train_list)
+test_image, test_label = vac_utils.load_images(classes, test_list)
 
 # convert to numpy.array
 x_train = np.asarray(train_image)

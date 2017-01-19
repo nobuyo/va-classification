@@ -3,7 +3,7 @@ from __future__ import print_function
 
 from keras.models import load_model
 import argparse
-import kml_utils
+import vac_utils
 import os
 import numpy as np
 
@@ -18,14 +18,14 @@ def parse_args():
     return args
     
 args = parse_args()
-if kml_utils.exist_list(args.list_dir):
+if vac_utils.exist_list(args.list_dir):
     print('Lists exist in ./{0}. Use the test list.'.format(args.list_dir))
-    classes, _, test_list = kml_utils.load_lists_with_division(args.list_dir,args.div_num)
+    classes, _, test_list = vac_utils.load_lists_with_division(args.list_dir,args.div_num)
 else:
     print('Lists do not exist.')
     exit(0)
 
-test_image, test_label = kml_utils.load_images(classes, test_list)
+test_image, test_label = vac_utils.load_images(classes, test_list)
 
 # convert to numpy.array
 x_test = np.asarray(test_image)
