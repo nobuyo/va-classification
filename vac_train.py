@@ -3,7 +3,7 @@ from __future__ import print_function
 
 from keras.models import Sequential
 from keras.models import load_model
-from keras.callbacks import LambdaCallback, EarlyStopping
+from keras.callbacks import LambdaCallback, ModelCheckpoint
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import RMSprop
@@ -48,7 +48,7 @@ print('test samples: ', len(x_test))
 
 NUM_CLASSES = len(classes)
 BATCH_SIZE = 32
-EPOCH = 100
+EPOCH = 60
 
 # building the model
 if args.my_model is None:
@@ -86,8 +86,8 @@ else:
 
 date_str = datetime.datetime.now().strftime('%Y%m%d%H%M')
 # callback_early_stop     = EarlyStopping(monitor='val_acc', patience=15, verbose=0, mode='auto')
-callback_save_epoch_end = LambdaCallback(on_epoch_end=model.save('epc_' + date_str + '.model'))
-
+# callback_save_epoch_end = LambdaCallback(on_epoch_end=model.save('epc_' + date_str + '.model'))
+callback_save_model = ModelCheckpoint('vac' + str(args.divnum) + '.model', monitor='val_loss', verbose=0, save_best_only=True, mode='auto')
 # training
 hist = model.fit(x_train, y_train,
                  batch_size=BATCH_SIZE,
@@ -95,10 +95,10 @@ hist = model.fit(x_train, y_train,
                  nb_epoch=EPOCH,
                  validation_data=(x_test, y_test),
                  # callbacks=[callback_save_epoch_end, callback_early_stop])
-                 callbacks=[callback_save_epoch_end])
+                 callbacks=[callback_save_model])
 
 # save model
-model.save('vac' + str(args.divnum) + '.model')
+# model.save('vac' + str(args.divnum) + '.model')
 
 # plot loss
 print(hist)
