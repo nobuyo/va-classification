@@ -85,20 +85,16 @@ else:
     model = load_model(args.my_model)
 
 date_str = datetime.datetime.now().strftime('%Y%m%d%H%M')
-# callback_early_stop     = EarlyStopping(monitor='val_acc', patience=15, verbose=0, mode='auto')
-# callback_save_epoch_end = LambdaCallback(on_epoch_end=model.save('epc_' + date_str + '.model'))
+callback_early_stop = EarlyStopping(monitor='val_loss', patience=0, verbose=0, mode='auto');
 callback_save_model = ModelCheckpoint('vac' + str(args.divnum) + '.model', monitor='val_loss', verbose=0, save_best_only=True, mode='auto')
+
 # training
 hist = model.fit(x_train, y_train,
                  batch_size=BATCH_SIZE,
                  verbose=1,
                  nb_epoch=EPOCH,
                  validation_data=(x_test, y_test),
-                 # callbacks=[callback_save_epoch_end, callback_early_stop])
                  callbacks=[callback_save_model])
-
-# save model
-# model.save('vac' + str(args.divnum) + '.model')
 
 # plot loss
 print(hist)
